@@ -6,8 +6,20 @@
     var START = 1, PLAY = 2, OVER = 3
     var gameState = START
 
-    var gravity = 0.1
+    var gravity = 0.05
     var catX = catY = hyp = 0
+
+    var score = 0
+
+    // Variavel para armazenar o record no local storage do navegador
+
+    var record = localStorage.getItem("record") ? localStorage.getItem("record") : 0
+
+    // Forma mais extensa de resgatar valor
+    // var record = 0
+    // if(localStorage.getItem("record") !== null) {
+    //     record = localStorage.getItem("record")
+    // }
 
     // bola do jogo
     var ball = {
@@ -25,15 +37,31 @@
     // mensagens do jogo
     var messages = []
 
+    // mensagem inicial
     var startMessage = {
         text: "TOUCH TO START",
-        y: cnv.height / 2 - 100,
+        y: (cnv.height / 2 - 100),
         font: "bold 30px Sans-serif",
         color: "#f00",
         visible: true
     }
 
     messages.push(startMessage)
+
+    // placar final
+    var scoreText = Object.create(startMessage)
+    scoreText.visible = false
+    scoreText.y = (cnv.height / 2 + 50)
+
+    messages.push(scoreText)
+
+    // record
+    var recordMessage = Object.create(startMessage)
+    recordMessage.visible = false
+    recordMessage.y = (cnv.height / 2 + 100)
+
+    messages.push(recordMessage)
+
 
     // eventos
     cnv.addEventListener("mousedown", function(e){
@@ -49,9 +77,11 @@
                 startGame()
                 break
             case PLAY :
-                if(hyp < ball.radius && !touched) {
+                if(hyp < ball.radius && !ball.touched) {
                     ball.vx = Math.floor(Math.random() * 21) - 10
                     ball.vy = -(Math.floor(Math.random() * 6) + 5)
+                    ball.touched = true
+                    score++
                 }
                 break
         }
@@ -109,11 +139,27 @@
                 startMessage.visible = true
                 gameState = START
             }, 2000)
+
+            scoreText.text = "YOUR SCORE: " + score
+            scoreText.visible = true
+
+            if(score > record) {
+                record = score
+                localStorage.setItem("record", record)
+            }
+
+            recordMessage.text = "BEST SCORE: " + record
+            recordMessage.visible = true
         }
     }
 
     function render() {
         ctx.clearRect(0,0, cnv.width, cnv.height)
+
+        // Criado por
+        ctx.font = "15px MT"
+        ctx.fillStyle = "#000"
+        ctx.fillText("By RenanS", 20, 585)
 
         // renderização da bola na tela
         if(ball.visible) {
@@ -122,6 +168,11 @@
             ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2, false)
             ctx.closePath()
             ctx.fill()
+
+            // score do jogo
+            ctx.font = "bold 15px Arial"
+            ctx.fillStyle = "#000"
+            ctx.fillText("SCORE: " + score, 10, 20)
         }
 
         // renderização das mensagens na tela
@@ -141,6 +192,9 @@
         ball.vx = Math.floor(Math.random() * 21) - 10
         ball.x = Math.floor(Math.random() * 241) - 20
         ball.visible = true
+        score = 0
+        scoreText.visible = false
+        recordMessage.visible = false
     }
 
     loop()
