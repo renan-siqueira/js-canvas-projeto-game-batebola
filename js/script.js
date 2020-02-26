@@ -36,7 +36,12 @@
     messages.push(startMessage)
 
     // eventos
-    window.addEventListener("mousedown", function(e){
+    cnv.addEventListener("mousedown", function(e){
+
+        catX = ball.x - e.offsetX
+        catY = ball.y - e.offsetY
+        hyp = Math.sqrt(catX*catX + catY*catY)
+
         switch(gameState) {
             case START : 
                 gameState = PLAY
@@ -44,8 +49,17 @@
                 startGame()
                 break
             case PLAY :
-
+                if(hyp < ball.radius && !touched) {
+                    ball.vx = Math.floor(Math.random() * 21) - 10
+                    ball.vy = -(Math.floor(Math.random() * 6) + 5)
+                }
                 break
+        }
+    })
+
+    cnv.addEventListener("mouseup", function(){
+        if(gameState === PLAY) {
+            ball.touched = false
         }
     })
 
@@ -74,8 +88,13 @@
             } else {
                 ball.x = cnv.width - ball.radius
             }
-
             ball.vx *= -0.8
+        }
+
+        // quicar no teto
+        if(ball.y < ball.radius && ball.vy < 0) {
+            ball.y = ball.radius
+            ball.vy *= -0.8
 
         }
 
